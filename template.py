@@ -5,7 +5,8 @@ def part_1():
         for line in file:
             array_1.append(line.strip())
 
-    print('read ' + str(len(array_1)) + ' lines')
+    for line in array_1:
+        print(line)
     
 def part_2():
     array_1 = []
@@ -14,7 +15,8 @@ def part_2():
         for line in file:
             array_1.append(line.strip())
 
-    print('read ' + str(len(array_1)) + ' lines')
+    for line in array_1:
+        print(line)
 
 part_1()
 part_2()
