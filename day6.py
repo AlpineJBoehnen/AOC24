@@ -108,6 +108,16 @@ def part_2():
             guard_pos = (guard_pos[0] - 1, guard_pos[1])
         return guard_pos
 
+    def is_next_move_origin(guard_pos, guard_dir, origin):
+        if guard_dir == Direction.UP:
+            return (guard_pos[0], guard_pos[1] - 1) == origin
+        if guard_dir == Direction.RIGHT:
+            return (guard_pos[0] + 1, guard_pos[1]) == origin
+        if guard_dir == Direction.DOWN:
+            return (guard_pos[0], guard_pos[1] + 1) == origin
+        if guard_dir == Direction.LEFT:
+            return (guard_pos[0] - 1, guard_pos[1]) == origin
+
     map = []
     guard_pos = (0,0) # x,y
     guard_dir = Direction.UP
@@ -136,29 +146,65 @@ def part_2():
                     guard_dir = Direction.LEFT
             map.append(list(lines[y].strip()))
 
+    start = (guard_pos[0], guard_pos[1], guard_dir)
+    
+    # less stupid (doesn't work)
     loops = 0
-    while True:
-        if not in_map_bounds(map, guard_pos[0], guard_pos[1]):
-            break
-        if is_blocked(map, guard_pos, guard_dir):
-            guard_dir = turn_right(guard_dir)
-        else:
-            sim_dir = turn_right(guard_dir) # simulate obstace placed in front of guard
-            sim_pos = guard_pos
-            sim_visited = set() # (x, y, dir)
+    # while True:
+    #     if not in_map_bounds(map, guard_pos[0], guard_pos[1]):
+    #         break
+    #     if is_blocked(map, guard_pos, guard_dir):
+    #         guard_dir = turn_right(guard_dir)
+    #     else:
+    #         if not is_next_move_origin(guard_pos, guard_dir, origin):
+    #             sim_dir = turn_right(guard_dir) # simulate obstace placed in front of guard
+    #             sim_pos = guard_pos
+    #             sim_visited = set() # (x, y, dir)
+    #             start = (sim_pos[0], sim_pos[1], guard_dir)
+    #             while True:
+    #                 cur = (sim_pos[0], sim_pos[1], sim_dir)
+    #                 if cur in sim_visited or cur == start:
+    #                     print("loop found at", guard_pos, guard_dir, len(sim_visited))
+    #                     loops += 1
+    #                     break
+    #                 if not in_map_bounds(map, sim_pos[0], sim_pos[1]):
+    #                     break
+    #                 if is_blocked(map, sim_pos, sim_dir):
+    #                     sim_dir = turn_right(sim_dir)
+    #                 else:
+    #                     sim_visited.add((sim_pos[0], sim_pos[1], sim_dir))
+    #                     sim_pos = move_forward(sim_pos, sim_dir)
+    #         guard_pos = move_forward(guard_pos, guard_dir)
+
+    # stupid (works)
+    total_dots = 0
+    for y in range(len(map)):
+        for x in range(len(map[y])):
+            if get_map_symbol(map, x, y) == '.':
+                total_dots += 1
+    round = 0
+    for y in range(len(map) - 1):
+        for x in range(len(map[y]) - 1):
+            if not get_map_symbol(map, x, y) == '.':
+                continue
+            round += 1
+            print(round, "/", total_dots, "[", loops, "]")
+            map[y][x] = '#'
+            steps = 0
             while True:
-                if (sim_pos[0], sim_pos[1], sim_dir) in sim_visited:
-                    print("loop found at", guard_pos, guard_dir)
+                if(steps == 10000):
                     loops += 1
                     break
-                if not in_map_bounds(map, sim_pos[0], sim_pos[1]):
+                if not in_map_bounds(map, guard_pos[0], guard_pos[1]):
                     break
-                if is_blocked(map, sim_pos, sim_dir):
-                    sim_dir = turn_right(sim_dir)
+                if is_blocked(map, guard_pos, guard_dir):
+                    guard_dir = turn_right(guard_dir)
                 else:
-                    sim_visited.add((sim_pos[0], sim_pos[1], sim_dir))
-                    sim_pos = move_forward(sim_pos, sim_dir)
-            guard_pos = move_forward(guard_pos, guard_dir)
+                    steps += 1
+                    guard_pos = move_forward(guard_pos, guard_dir)
+            map[y][x] = '.'
+            guard_pos = (start[0], start[1])
+            guard_dir = start[2]
 
     print(loops)
 
